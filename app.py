@@ -11,8 +11,8 @@ import simplejson as json
 import urllib2
 import numpy as np
 import pandas as pd
-from bokeh.charts import TimeSeries
 from bokeh.embed import components
+import bokeh.charts
 
 quandlkey='8Wy423i2j9KUSTzAoZEA'
 
@@ -40,15 +40,15 @@ def index():
         colname=pydata['dataset']['column_names']
         data=pydata['dataset']['data']
         df=pd.DataFrame(np.array(data),columns=colname)
-    
+        df.index=pd.to_datetime(df.pop('Date'))
         col=app.vars['selected_features']
-        df[col]=df[col].astype(float)
+        df_multi=df[col]
+        df_multi=df_multi.astype(float)
 
-        df=df.sort_values(by='Date')
-	#print df.head()
-        tsline=TimeSeries(df,x='Date',y=col)
-        script, div = components(tsline)
+        plot = bokeh.charts.Line(df_multi, title='Data from Quandle WIKI set', xlabel='date',legend="top_left")
+        script, div = components(plot)
         return render_template('graph.html', script=script, div=div)	
+
 
 if __name__ == '__main__':
   
